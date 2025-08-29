@@ -21,7 +21,7 @@ const bird = {
     height: 30,
     velocity: 0,
     gravity: 0.12,
-    jump: -4,
+    jump: -5,
     color: '#FFD700',
     wingColor: '#FFA500'
 };
