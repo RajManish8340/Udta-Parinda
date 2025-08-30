@@ -7,13 +7,11 @@ const finalScoreElement = document.getElementById('finalScore');
 const bestScoreElement = document.getElementById('bestScore');
 const instructionsElement = document.getElementById('instructions');
 
-// Game variables
 let gameState = 'waiting'; // 'waiting', 'playing', 'gameOver'
 let score = 0;
 let bestScore = 0;
 let gameSpeed = 2;
 
-// Bird object
 const bird = {
     x: 80,
     y: canvas.height / 2,
@@ -26,14 +24,12 @@ const bird = {
     wingColor: '#FFA500'
 };
 
-// Pipes array
 const pipes = [];
 const pipeWidth = 80;
 const pipeGap = 250;
 let pipeSpawnTimer = 0;
 const pipeSpawnRate = 100;
 
-// Ground
 const ground = {
     x: 0,
     y: canvas.height - 50,
@@ -41,7 +37,6 @@ const ground = {
     height: 50
 };
 
-// Input handling
 document.addEventListener('keydown', (e) => {
     if (e.code === 'Space') {
         e.preventDefault();
@@ -84,11 +79,9 @@ function restartGame() {
 function updateBird() {
     if (gameState !== 'playing') return;
 
-    // Apply gravity
     bird.velocity += bird.gravity;
     bird.y += bird.velocity;
 
-    // Check boundaries
     if (bird.y + bird.height > ground.y || bird.y < 0) {
         endGame();
     }
@@ -97,37 +90,31 @@ function updateBird() {
 function updatePipes() {
     if (gameState !== 'playing') return;
 
-    // Spawn new pipes
     pipeSpawnTimer++;
     if (pipeSpawnTimer >= pipeSpawnRate) {
         spawnPipe();
         pipeSpawnTimer = 0;
     }
 
-    // Update existing pipes
     for (let i = pipes.length - 1; i >= 0; i--) {
         const pipe = pipes[i];
         pipe.x -= gameSpeed;
 
-        // Remove pipes that are off screen
         if (pipe.x + pipeWidth < 0) {
             pipes.splice(i, 1);
             continue;
         }
 
-        // Check for scoring
         if (!pipe.scored && pipe.x + pipeWidth < bird.x) {
             score++;
             pipe.scored = true;
             scoreElement.textContent = score;
             
-            // Increase game speed slightly
             if (score % 5 === 0) {
                 gameSpeed += 0.2;
             }
         }
 
-        // Check collision
         if (checkCollision(bird, pipe)) {
             endGame();
         }
@@ -149,14 +136,12 @@ function spawnPipe() {
 }
 
 function checkCollision(bird, pipe) {
-    // Check collision with top pipe
     if (bird.x < pipe.x + pipeWidth &&
         bird.x + bird.width > pipe.x &&
         bird.y < pipe.topHeight) {
         return true;
     }
 
-    // Check collision with bottom pipe
     if (bird.x < pipe.x + pipeWidth &&
         bird.x + bird.width > pipe.x &&
         bird.y + bird.height > pipe.bottomY) {
@@ -169,7 +154,6 @@ function checkCollision(bird, pipe) {
 function endGame() {
     gameState = 'gameOver';
     
-    // Update best score
     if (score > bestScore) {
         bestScore = score;
     }
@@ -182,15 +166,12 @@ function endGame() {
 function drawBird() {
     ctx.save();
     
-    // Bird body
     ctx.fillStyle = bird.color;
     ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
     
-    // Bird wing
     ctx.fillStyle = bird.wingColor;
     ctx.fillRect(bird.x + 5, bird.y + 5, 15, 10);
     
-    // Bird eye
     ctx.fillStyle = 'white';
     ctx.fillRect(bird.x + 25, bird.y + 5, 8, 8);
     ctx.fillStyle = 'black';
@@ -207,13 +188,10 @@ function drawPipes() {
     ctx.fillStyle = '#228B22';
     
     pipes.forEach(pipe => {
-        // Top pipe
         ctx.fillRect(pipe.x, 0, pipeWidth, pipe.topHeight);
         
-        // Bottom pipe
         ctx.fillRect(pipe.x, pipe.bottomY, pipeWidth, pipe.bottomHeight);
         
-        // Pipe caps
         ctx.fillStyle = '#32CD32';
         ctx.fillRect(pipe.x - 5, pipe.topHeight - 30, pipeWidth + 10, 30);
         ctx.fillRect(pipe.x - 5, pipe.bottomY, pipeWidth + 10, 30);
@@ -222,11 +200,9 @@ function drawPipes() {
 }
 
 function drawGround() {
-    // Ground
     ctx.fillStyle = '#8B4513';
     ctx.fillRect(0, ground.y, canvas.width, ground.height);
     
-    // Ground texture
     ctx.fillStyle = '#A0522D';
     for (let i = 0; i < canvas.width; i += 20) {
         ctx.fillRect(i, ground.y + 10, 10, 5);
@@ -235,7 +211,6 @@ function drawGround() {
 }
 
 function drawBackground() {
-    // Sky gradient
     const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
     gradient.addColorStop(0, '#87CEEB');
     gradient.addColorStop(0.7, '#87CEEB');
@@ -243,13 +218,11 @@ function drawBackground() {
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Sun
     ctx.fillStyle = '#FFD700';
     ctx.beginPath();
     ctx.arc(canvas.width - 100, 80, 40, 0, Math.PI * 2);
     ctx.fill();
     
-    // Sun rays
     ctx.strokeStyle = '#FFD700';
     ctx.lineWidth = 3;
     for (let i = 0; i < 8; i++) {
@@ -266,29 +239,22 @@ function drawBackground() {
 }
 
 function gameLoop() {
-    // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Draw everything
     drawBackground();
     drawGround();
     drawPipes();
     drawBird();
     
-    // Update game objects
     updateBird();
     updatePipes();
     
-    // Continue loop
     requestAnimationFrame(gameLoop);
 }
 
-// Initialize game
 function init() {
-    // Load best score from memory variable
     restartGame();
     gameLoop();
 }
 
-// Start the game
 init();
